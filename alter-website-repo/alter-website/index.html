@@ -78,10 +78,14 @@
     justify-content: center;
     gap: 1rem;
     max-width: 96vw;
+    /* hauteur du logo ; le « er » occupe 73,4 % de sa hauteur (201→755 px sur 755 px)
+       et repose sur le bas de l'image */
+    --logo-h: 40px;
+    --er-h: calc(var(--logo-h) * 0.734);
   }
 
   .logo {
-    height: 38px;
+    height: var(--logo-h);
     width: auto;
     display: block;
     flex-shrink: 0;
@@ -90,8 +94,15 @@
   .info {
     display: flex;
     flex-direction: column;
-    width: 16.5em;            /* largeur fixe : les 4 lignes sont justifiées sur cette largeur */
-    font-size: 12px;
+    width: 19.8em;            /* largeur fixe : les lignes sont justifiées sur cette largeur */
+    /* le texte (du haut des capitales de la 1re ligne à la ligne de base de la
+       dernière) fait exactement la hauteur du « er » : 3 lignes Inter à
+       line-height 1.12 = 2.967em d'encre */
+    font-size: calc(var(--er-h) / 2.967);
+    /* aligné en bas du logo : la ligne de base de la dernière ligne
+       tombe sur le pied du « er » */
+    align-self: flex-end;
+    margin-bottom: -0.197em;
     font-family: 'Inter', "Helvetica Neue", Arial, sans-serif;
     font-weight: 500;
   }
@@ -129,20 +140,12 @@
   .info .sep { opacity: 0.85; padding: 0 0.5em; }
   .info .addr a { width: 100%; }
 
+  .phone { gap: 0.28em; }
+  .phone span:first-child { margin-right: -0.28em; }
+
   /* ordinateur */
   @media (min-width: 700px) {
-    .center-content { gap: 1.6rem; }
-    .logo { height: 56px; }
-    .info { font-size: 14px; width: 19.8em; }
-    .phone { gap: 0.28em; }
-    .phone span:first-child { margin-right: -0.28em; }
-  }
-
-  /* téléphone : Instagram, téléphone et email sur leur propre ligne, étirés */
-  @media (max-width: 699px) {
-    .info .r-insta { flex-direction: column; align-items: stretch; }
-    .info .r-insta a { width: 100%; }
-    .info .sep { display: none; }
+    .center-content { gap: 1.6rem; --logo-h: 56px; }
   }
 </style>
 </head>
