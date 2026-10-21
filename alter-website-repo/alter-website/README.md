@@ -10,4 +10,4 @@ Page d'accueil : vidéo de fond en rotation, logo et coordonnées.
 Ajouter une vidéo : encoder en H.264 avec `-movflags +faststart` (sinon le navigateur ne la lit pas bien),
 mettre le fichier dans `videos/` et `videos/mobile/`, créer son poster, puis ajouter une ligne dans `BACKGROUNDS`.
 
-Hébergement : Netlify, projet `alterwebsite` (publié depuis la racine, sans build).
+Hébergement : Netlify, projet `alterwebsite` (le `netlify.toml` à la racine du dépôt publie ce dossier, sans build).
