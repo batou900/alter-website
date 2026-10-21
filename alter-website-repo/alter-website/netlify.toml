@@ -1,0 +1,14 @@
+# Site statique : pas de build, on publie le dossier tel quel.
+[build]
+  publish = "."
+
+# Vidéos et images : mises en cache longtemps par le navigateur
+[[headers]]
+  for = "/videos/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/posters/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Alter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Le noir est sur <html> UNIQUEMENT. Si <body> avait aussi un fond,
+     il se peindrait par-dessus la vidéo (z-index négatif) => écran noir. */
+  html { background: #000; }
+  body { background: transparent; }
+
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #fff;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* --- Fond : image (poster) toujours visible, la vidéo apparaît par-dessus --- */
+  #bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: #000 center / cover no-repeat;
+    z-index: -3;
+    filter: brightness(0.72);
+  }
+
+  #bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    object-fit: cover;
+    z-index: -2;
+    filter: brightness(0.72);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    background: transparent;
+  }
+  #bg-video.playing { opacity: 1; }
+
+  .bg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+  }
+
+  /* --- Bloc central : logo + infos (même disposition que la version Squarespace) --- */
+  .center-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 96vw;
+  }
+
+  .logo {
+    height: 38px;
+    width: auto;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    width: 16.5em;            /* largeur fixe : les 4 lignes sont justifiées sur cette largeur */
+    font-size: 12px;
+    font-family: 'Inter', "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+  }
+
+  /* l'adresse fixe la largeur du bloc ; les autres lignes s'étirent dessus */
+  .info p {
+    margin: 0;
+    font-size: inherit;
+    line-height: 1.12;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+    white-space: nowrap;
+  }
+  .info a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  /* soulignement continu au survol (une seule ligne, même quand les mots sont espacés) */
+  .info a { position: relative; }
+  .info a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 0.06em;
+    height: 1px;
+    background: currentColor;
+    opacity: 0;
+  }
+  .info a:hover::after, .info a:focus-visible::after { opacity: 1; }
+  .info .sep { opacity: 0.85; padding: 0 0.5em; }
+  .info .addr a { width: 100%; }
+
+  /* ordinateur */
+  @media (min-width: 700px) {
+    .center-content { gap: 1.6rem; }
+    .logo { height: 56px; }
+    .info { font-size: 14px; width: 19.8em; }
+    .phone { gap: 0.28em; }
+    .phone span:first-child { margin-right: -0.28em; }
+  }
+
+  /* téléphone : Instagram, téléphone et email sur leur propre ligne, étirés */
+  @media (max-width: 699px) {
+    .info .r-insta { flex-direction: column; align-items: stretch; }
+    .info .r-insta a { width: 100%; }
+    .info .sep { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="bg"></div>
+  <video id="bg-video" muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+  <div class="bg-overlay"></div>
+
+  <div class="center-content">
+    <img class="logo" src="alter_logo_white.png" alt="Alter">
+
+    <div class="info">
+      <p class="addr">
+        <a id="link-address" href="#" target="_blank" rel="noopener"><span>Pt</span><span>Rue</span><span>du</span><span>Moulin</span><span>11</span><span>1070</span><span>Brussels</span></a>
+      </p>
+      <p class="r-insta">
+        <a id="link-instagram" href="#" target="_blank" rel="noopener"><span>@</span><span>alteralteralteralter</span></a>
+        <span class="sep">/</span>
+        <a id="link-phone" class="phone" href="#"><span>+</span><span>32</span><span>492</span><span>68</span><span>39</span><span>28</span></a>
+      </p>
+      <p class="r-mail">
+        <a id="link-email" href="#" style="width:100%"><span>admin@</span><span>alteralteralter.com</span></a>
+      </p>
+    </div>
+  </div>
+
+<script>
+  // ------------------------------------------------------------------
+  // 1) LIENS CLIQUABLES
+  // ------------------------------------------------------------------
+  const CONTACT = {
+    mapsUrl: "https://www.google.com/maps/place/ALTER/@50.8234371,4.3024428,17z/data=!4m15!1m8!3m7!1s0x47c3c69dd121f63d:0x7b3830314bfd5e4d!2sPt+Rue+du+Moulin+11,+1070+Bruxelles,+Belgique!3b1!8m2!3d50.8234371!4d4.3024428!16s%2Fg%2F11l6zqsd0l!3m5!1s0x47c3c759c09d9f5b:0x342a3759df1e057f!8m2!3d50.8234312!4d4.3024319!16s%2Fg%2F11zyx04bvh?entry=ttu&g_ep=EgoyMDI2MTAxOC4wIKXMDSoASAFQAw%3D%3D",
+    instagramUrl: "https://www.instagram.com/alteralteralteralter/",
+    phone: "+32492683928",
+    email: "admin@alteralteralter.com"
+  };
+
+  document.getElementById('link-address').href = CONTACT.mapsUrl;
+  document.getElementById('link-instagram').href = CONTACT.instagramUrl;
+  document.getElementById('link-phone').href = "tel:" + CONTACT.phone;
+  document.getElementById('link-email').href = "mailto:" + CONTACT.email;
+
+  // ------------------------------------------------------------------
+  // 2) FONDS EN ROTATION (vidéo + image d'attente)
+  //    Pour chaque fond : une vidéo desktop, une vidéo mobile (plus
+  //    légère) et une image (poster) affichée avant/à la place de la
+  //    vidéo. Ajoute ou enlève des lignes pour changer le nombre de fonds.
+  //    À chaque rechargement, le fond suivant est utilisé.
+  // ------------------------------------------------------------------
+  const BACKGROUNDS = [
+    { video: "videos/video1.mp4", mobile: "videos/mobile/video1.mp4", poster: "posters/poster1.jpg" },
+    { video: "videos/video2.mp4", mobile: "videos/mobile/video2.mp4", poster: "posters/poster2.jpg" },
+    { video: "videos/video3.mp4", mobile: "videos/mobile/video3.mp4", poster: "posters/poster3.jpg" },
+    { video: "videos/video4.mp4", mobile: "videos/mobile/video4.mp4", poster: "posters/poster4.jpg" },
+    { video: "videos/video5.mp4", mobile: "videos/mobile/video5.mp4", poster: "posters/poster5.jpg" },
+    { video: "videos/video6.mp4", mobile: "videos/mobile/video6.mp4", poster: "posters/poster6.jpg" }
+  ];
+
+  const STORAGE_KEY = "alter-bg-index";
+  const N = BACKGROUNDS.length;
+  const bg = document.getElementById('bg');
+  const video = document.getElementById('bg-video');
+
+  // Choix du fond suivant. Si le navigateur bloque localStorage (cas
+  // fréquent quand on ouvre index.html en double-clic), on tire un fond
+  // au hasard : ça change quand même à chaque rafraîchissement.
+  function nextIndex() {
+    try {
+      const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+      const cur = (isNaN(saved) || saved < 0 || saved >= N) ? 0 : saved;
+      localStorage.setItem(STORAGE_KEY, (cur + 1) % N);
+      return cur;
+    } catch (e) {
+      return Math.floor(Math.random() * N);
+    }
+  }
+
+  const isMobile = window.matchMedia("(max-width: 820px)").matches ||
+                   (navigator.connection && navigator.connection.saveData);
+
+  let index = nextIndex();
+  let attempts = 0;
+
+  function show(i) {
+    const item = BACKGROUNDS[i];
+    bg.style.backgroundImage = "url('" + item.poster + "')";
+    video.classList.remove('playing');
+    video.muted = true;               // indispensable pour la lecture auto (iOS/Android)
+    video.setAttribute('muted', '');
+    video.src = isMobile ? item.mobile : item.video;
+    video.load();
+    const p = video.play();
+    if (p && p.catch) p.catch(function () { /* lecture bloquée : l'image reste affichée */ });
+  }
+
+  video.addEventListener('playing', function () { video.classList.add('playing'); });
+
+  video.addEventListener('error', function () {
+    console.warn('Vidéo illisible :', video.currentSrc);
+    attempts++;
+    if (attempts < N) {
+      index = (index + 1) % N;
+      show(index);
+    }
+  });
+
+  // Si le téléphone bloque la lecture auto (mode économie d'énergie iPhone),
+  // on relance la vidéo au premier contact avec l'écran.
+  function retryOnTouch() {
+    if (video.paused) video.play().catch(function () {});
+  }
+  ['touchstart', 'click', 'scroll'].forEach(function (ev) {
+    window.addEventListener(ev, retryOnTouch, { once: true, passive: true });
+  });
+
+  // Reprend la lecture quand on revient sur l'onglet
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && video.paused) video.play().catch(function () {});
+  });
+
+  show(index);
+</script>
+
+</body>
+</html>
