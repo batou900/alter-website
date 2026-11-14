@@ -3,7 +3,7 @@
 Page d'accueil : vidéo de fond en rotation, logo et coordonnées.
 
 - `index.html` : toute la page (HTML, CSS, JS). Liens de contact dans `CONTACT`, vidéos dans `BACKGROUNDS`.
-- `videos/` : vidéos desktop (H.264, sans son). `videos/mobile/` : versions légères pour téléphone.
+- `videos/` : vidéos desktop (H.264 1080p, sans son, `-crf 27 -movflags +faststart`). `videos/mobile/` : versions légères pour téléphone.
 - `posters/` : image affichée en attendant la vidéo.
 - `alter_logo_white.png` : logo.
 
